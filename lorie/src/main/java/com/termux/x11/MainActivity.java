@@ -258,13 +258,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // تشغيل Debian تلقائياً عبر Termux
+        // تشغيل Debian تلقائياً عبر Termux
         try {
-            Intent runCmd = new Intent();
-            runCmd.setClassName("com.termux", "com.termux.app.RunCommandService");
-            runCmd.setAction("com.termux.RUN_COMMAND");
-            runCmd.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/start-debian.sh");
-            runCmd.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
-            startForegroundService(runCmd);
+            Runtime.getRuntime().exec(new String[]{
+                "/system/bin/am", "broadcast",
+                "--user", "0",
+                "-a", "com.termux.RUN_COMMAND",
+                "-p", "com.termux",
+                "--es", "com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/start-debian.sh",
+                "--ez", "com.termux.RUN_COMMAND_BACKGROUND", "true"
+            });
         } catch (Exception e) {
             Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
         }
