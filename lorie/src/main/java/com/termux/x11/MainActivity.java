@@ -257,18 +257,8 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 0);
         }
 
-        // تشغيل Debian تلقائياً عبر Termux
-        try {
-            Intent runCmd = new Intent();
-            runCmd.setClassName("com.termux", "com.termux.app.RunCommandService");
-            runCmd.setAction("com.termux.RUN_COMMAND");
-            runCmd.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/start-debian.sh");
-            runCmd.putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{"/storage/emulated/0/Download/debian-12-nocloud-amd64-20241201-1948.qcow2"});
-            runCmd.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
-            startForegroundService(runCmd);
-        } catch (Exception e) {
-            Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
-        }
+        // نافذة تطلب مسار الروم وتشغله
+        showRomPathDialog();
 
         onReceiveConnection(getIntent());
         findViewById(android.R.id.content).addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> makeSureHelpersAreVisibleAndInScreenBounds());
@@ -1028,5 +1018,43 @@ public class MainActivity extends AppCompatActivity {
         if (connected && !showIMEWhileExternalConnected)
             inputMethodManager.hideSoftInputFromWindow(getWindow().getDecorView().getRootView().getWindowToken(), 0);
         getLorieView().requestFocus();
+    }
+
+    private void showRomPathDialog() {
+        android.content.SharedPreferences sp = getSharedPreferences("debian_launcher", MODE_PRIVATE);
+        String savedPath = sp.getString("rom_path", "");
+
+        final EditText input = new EditText(this);
+        input.setHint("/storage/emulated/0/Download/debian.qcow2");
+        if (!savedPath.isEmpty())
+            input.setText(savedPath);
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("مسار ملف الروم (qcow2)")
+                .setView(input)
+                .setCancelable(false)
+                .setPositiveButton("تشغيل", (dialog, which) -> {
+                    String path = input.getText().toString().trim();
+                    if (path.isEmpty())
+                        return;
+                    sp.edit().putString("rom_path", path).apply();
+                    launchDebian(path);
+                })
+                .setNegativeButton("إلغاء", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void launchDebian(String romPath) {
+        try {
+            Intent runCmd = new Intent();
+            runCmd.setClassName("com.termux", "com.termux.app.RunCommandService");
+            runCmd.setAction("com.termux.RUN_COMMAND");
+            runCmd.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/start-debian.sh");
+            runCmd.putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{romPath});
+            runCmd.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
+            startForegroundService(runCmd);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
+        }
     }
 }
