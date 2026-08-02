@@ -257,8 +257,8 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 0);
         }
 
-        // نافذة تطلب مسار الروم وتشغله
-        showRomPathDialog();
+        // تشغيل Debian تلقائياً عبر Termux
+        launchDebian("/storage/emulated/0/Download/debian-12-nocloud-amd64-20241201-1948.qcow2");
 
         onReceiveConnection(getIntent());
         findViewById(android.R.id.content).addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> makeSureHelpersAreVisibleAndInScreenBounds());
@@ -1018,30 +1018,6 @@ public class MainActivity extends AppCompatActivity {
         if (connected && !showIMEWhileExternalConnected)
             inputMethodManager.hideSoftInputFromWindow(getWindow().getDecorView().getRootView().getWindowToken(), 0);
         getLorieView().requestFocus();
-    }
-
-    private void showRomPathDialog() {
-        android.content.SharedPreferences sp = getSharedPreferences("debian_launcher", MODE_PRIVATE);
-        String savedPath = sp.getString("rom_path", "");
-
-        final EditText input = new EditText(this);
-        input.setHint("/storage/emulated/0/Download/debian.qcow2");
-        if (!savedPath.isEmpty())
-            input.setText(savedPath);
-
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("مسار ملف الروم (qcow2)")
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton("تشغيل", (dialog, which) -> {
-                    String path = input.getText().toString().trim();
-                    if (path.isEmpty())
-                        return;
-                    sp.edit().putString("rom_path", path).apply();
-                    launchDebian(path);
-                })
-                .setNegativeButton("إلغاء", (dialog, which) -> dialog.dismiss())
-                .show();
     }
 
     private void launchDebian(String romPath) {
