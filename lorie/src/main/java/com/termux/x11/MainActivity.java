@@ -269,9 +269,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
         }
-        } catch (Exception e) {
-            Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
-        }
 
         onReceiveConnection(getIntent());
         findViewById(android.R.id.content).addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> makeSureHelpersAreVisibleAndInScreenBounds());
