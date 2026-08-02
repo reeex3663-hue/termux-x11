@@ -257,6 +257,18 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 0);
         }
 
+        // تشغيل Debian تلقائياً عبر Termux
+        try {
+            Intent runCmd = new Intent();
+            runCmd.setClassName("com.termux", "com.termux.app.RunCommandService");
+            runCmd.setAction("com.termux.RUN_COMMAND");
+            runCmd.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/start-debian.sh");
+            runCmd.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
+            startForegroundService(runCmd);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Failed to auto-start Debian via Termux", e);
+        }
+
         onReceiveConnection(getIntent());
         findViewById(android.R.id.content).addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> makeSureHelpersAreVisibleAndInScreenBounds());
     }
